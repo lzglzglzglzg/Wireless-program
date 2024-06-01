@@ -18,7 +18,7 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, collate_fn=collate_fn_test)
 
     # 加载模型
-    model_path = './model/model_4277.pth'  # 替换为你的模型路径
+    model_path = './model/model_4370.pth'  # 替换为你的模型路径
     model = torch.load(model_path, map_location='cpu')
     model.eval()
 
@@ -39,10 +39,10 @@ def main():
 
     # 将预测结果保存到CSV文件，提交时注意去除表头
     i = 1
-    csv_output_path = folder_path + f'/result_{i}.csv'
+    csv_output_path = f'../results/result_{i}.csv'
     if os.path.exists(csv_output_path):
         i += 1
-        csv_output_path = folder_path + f'/result_{i}.csv'
+        csv_output_path = f'../results/result_{i}.csv'
     df_predictions.to_csv(csv_output_path, index=False)  # index=False避免将索引写入CSV文件
 
     print(f'Predictions have been saved to {csv_output_path}')

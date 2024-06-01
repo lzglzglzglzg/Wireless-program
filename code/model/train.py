@@ -38,7 +38,7 @@ def main():
     print(device)
     model.to(device)
 
-    max_acc = 0.42
+    max_acc = 0.3
 
     for epoch in range(num_epochs):
         model.train()
