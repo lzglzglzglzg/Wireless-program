@@ -63,7 +63,7 @@ def main():
         accuracy = total_correct / len(val_dataset)
         print(f'Epoch {epoch + 1}, Validation Accuracy: {accuracy}')
         if accuracy >= max_acc:
-            torch.save(model, f'./model/model_{int(accuracy * 10000)}.pth')
+            torch.save(model, f'../checkpoint/model_{int(accuracy * 10000)}.pth')
             max_acc = accuracy
 
 if __name__ == "__main__":
