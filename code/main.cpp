@@ -29,6 +29,11 @@ void get_users_of_core(){
         if (tasks[uid].empty()) {
             continue;
         }
+        auto min_iter = min_element(cores_time.begin(), cores_time.end());
+        int min_index = distance(cores_time.begin(), min_iter);
+
+        users_of_core[min_index].push_back(uid);
+        cores_time[min_index] += user_all_time[uid];
     }
 }
 
@@ -46,6 +51,16 @@ void demo(){
         }
         curChooseCore++;
         curChooseCore = curChooseCore % m;
+    }
+}
+
+void demo_1(){
+    for (int core_id = 0; core_id < m; ++core_id) {
+        for (int i = 0; i < users_of_core[core_id].size(); i ++){
+            for (auto &task : tasks[users_of_core[core_id][i]]) {
+                cores[core_id].push_back(task);
+            }
+        }
     }
 }
 
@@ -71,9 +86,10 @@ int main()
         tasks[task.usrInst].push_back(task);
         user_all_time[task.usrInst] += task.exeTime;
     }
+    get_users_of_core();
     
     // 3.逻辑调度
-    demo();
+    demo_1();
 
     // 4.输出结果，使用字符串存储，一次IO输出
     stringstream out;
