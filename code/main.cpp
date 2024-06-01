@@ -114,7 +114,7 @@ int main()
     get_users_of_core();
     
     // 3.逻辑调度
-    demo_1();
+    demo_2();
 
     // 4.输出结果，使用字符串存储，一次IO输出
     stringstream out;
