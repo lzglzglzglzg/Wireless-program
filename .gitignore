@@ -1,3 +1,4 @@
-*.zip
+test_set.zip
+train_set_remake.zip
 *.bin
 *.pth
