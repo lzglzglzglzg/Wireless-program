@@ -1,3 +1,4 @@
 *.csv
 *.zip
 *.bin
+*.pth
