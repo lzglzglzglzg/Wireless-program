@@ -6,6 +6,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from imblearn.over_sampling import RandomOverSampler
 
 from model import Model, ComplexModel
 from datasets import ComplexDataset_train, collate_fn_train
@@ -21,7 +23,11 @@ def main():
     # 划分数据集
     train_data, val_data, train_labels, val_labels = train_test_split(data, labels, test_size=0.1, random_state=42)
 
-    train_dataset = ComplexDataset_train(train_data, train_labels)
+    ros = RandomOverSampler(random_state=42)
+    train_data_resampled, train_labels_resampled = ros.fit_resample(train_data, train_labels)
+    # print(len(train_data_resampled))
+
+    train_dataset = ComplexDataset_train(train_data_resampled, train_labels_resampled)
     val_dataset = ComplexDataset_train(val_data, val_labels)
 
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, collate_fn=collate_fn_train)
@@ -33,15 +39,18 @@ def main():
     optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-5)
 
     # 训练模型
-    num_epochs = 150
+    num_epochs = 100
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
     model.to(device)
 
-    max_acc = 0.7
+    max_acc = 0.3
+
+    losses = []  # 用于收集每个epoch的平均损失
 
     for epoch in range(num_epochs):
         model.train()
+        epoch_losses = []
         for inputs, targets in train_loader:
             inputs, targets = inputs.to(device), targets.to(device)
             optimizer.zero_grad()
@@ -49,6 +58,11 @@ def main():
             loss = criterion(outputs, targets)
             loss.backward()
             optimizer.step()
+
+            epoch_losses.append(loss.item())
+        
+        epoch_loss = sum(epoch_losses) / len(epoch_losses)
+        losses.append(epoch_loss)
 
         # 验证集上的评估
         model.eval()
@@ -59,12 +73,29 @@ def main():
                 outputs = model(inputs)
                 _, predicted = torch.max(outputs.data, 1)
                 total_correct += (predicted == targets).sum().item()
+        with torch.no_grad():
+            total_correct_train = 0
+            for inputs, targets in train_loader:
+                inputs, targets = inputs.to(device), targets.to(device)
+                outputs = model(inputs)
+                _, predicted = torch.max(outputs.data, 1)
+                total_correct_train += (predicted == targets).sum().item()
 
         accuracy = total_correct / len(val_dataset)
-        print(f'Epoch {epoch + 1}, Validation Accuracy: {accuracy}')
+        accuracy_train = total_correct_train / len(train_dataset)
+        print(f'Epoch {epoch + 1}, Validation Accuracy: {accuracy}, Train Accuracy: {accuracy_train}')
         if accuracy >= max_acc:
             torch.save(model, f'../checkpoint/model_{int(accuracy * 10000)}.pth')
             max_acc = accuracy
+
+    # 绘制损失随epoch变化的图
+    plt.figure(figsize=(10, 5))
+    plt.plot(range(1, num_epochs+1), losses, marker='o', linestyle='-', color='b')
+    plt.title('Training Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.grid(True)
+    plt.savefig('training_loss.png')
 
 if __name__ == "__main__":
     main()

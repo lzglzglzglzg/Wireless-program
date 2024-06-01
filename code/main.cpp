@@ -64,6 +64,31 @@ void demo_1(){
     }
 }
 
+void demo_2(){
+    for (int core_id = 0; core_id < m; ++core_id) {  
+        while(true){
+            int task_id = -1;
+            int user_id;
+            for (int i = 0; i < users_of_core[core_id].size(); i ++){
+                int uid = users_of_core[core_id][i];
+                if(user_task_index[uid] < tasks[uid].size()){
+                    user_id = uid;
+                    task_id = user_task_index[uid];
+                    if(cores_task_type[core_id] == -1 || tasks[uid][user_task_index[uid]].msgType == cores_task_type[core_id]) break;
+                }
+            }
+            if(task_id == -1){
+                break;
+            }
+            else{
+                cores[core_id].push_back(tasks[user_id][task_id]);
+                cores_task_type[core_id] = tasks[user_id][task_id].msgType;
+                user_task_index[user_id] ++;
+            }
+        }
+    }
+}
+
 int main() 
 {
     // 1.读取任务数、核数、系统最大执行时间
@@ -73,7 +98,7 @@ int main()
 
     user_task_index = vector<int>(MAX_USER_ID, 0);
     cores_time = vector<int>(m, 0);
-    cores_task_type = vector<int>(m);
+    cores_task_type = vector<int>(m, -1);
     user_all_time = vector<int>(MAX_USER_ID, 0);
     users_of_core = vector<vector<int>>(m);
 
