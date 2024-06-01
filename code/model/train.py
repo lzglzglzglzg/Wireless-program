@@ -7,7 +7,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 
-from model import Model
+from model import Model, ComplexModel
 from datasets import ComplexDataset_train, collate_fn_train
 from utils import preprocess_train
 
@@ -28,7 +28,7 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, collate_fn=collate_fn_train)
 
     # 定义模型
-    model = Model()
+    model = ComplexModel()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-5)
 
@@ -38,7 +38,7 @@ def main():
     print(device)
     model.to(device)
 
-    max_acc = 0.3
+    max_acc = 0.7
 
     for epoch in range(num_epochs):
         model.train()
