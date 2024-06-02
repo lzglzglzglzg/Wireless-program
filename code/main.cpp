@@ -149,7 +149,7 @@ void demo_3(){
             dispersed_users.erase(position);
             users_of_core[min_index].push_back(select_user);
         }
-        if(user_task_index[select_user] == tasks[select_user].size()) users_of_core[min_index].erase(find(users_of_core[min_index].begin(), users_of_core[min_index].end(), select_user));
+        if(select_user != -1 && user_task_index[select_user] == tasks[select_user].size()) users_of_core[min_index].erase(find(users_of_core[min_index].begin(), users_of_core[min_index].end(), select_user));
     }
 }
 
