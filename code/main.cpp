@@ -24,6 +24,7 @@ vector<int> cores_task_type; // 分配给核的最后一个任务的类型
 vector<int> user_all_time;  // 用户的任务时间总和
 vector<vector<int>> users_of_core; // 每个核所负责的用户
 vector<int> dispersed_users; // 没有对应核的用户
+int all_q_score = 0, all_c_score = 0;
 
 void get_users_of_core(){
     for (int uid = 0; uid < MAX_USER_ID; ++uid) {
@@ -101,15 +102,14 @@ void demo_3(){
 
         int select_q_s = 0, select_c_s = 0; // 选择对应任务的亲和分和任务完成分  
         int select_user = -1;
-        MessageTask last_task;
         for(int i = 0; i < users_of_core[min_index].size(); i ++){  // 从负责的用户集中选择
             int uid = users_of_core[min_index][i];
             if(user_task_index[uid] < tasks[uid].size()){
                 int q_s = 0, c_s = 0;
                 MessageTask task = tasks[uid][user_task_index[uid]];
-                if(last_task.msgType == task.msgType) q_s = 1;
+                if(cores_task_type[min_index] == task.msgType) q_s = 1;
                 if(task.exeTime + cores_time[min_index] <= task.deadLine) c_s = 1;
-                if(select_user != -1 || (select_q_s + select_c_s < q_s + c_s)){
+                if(select_user == -1 || (select_q_s + select_c_s < q_s + c_s) || (select_q_s == 0 && select_c_s == 1 && q_s == 1 && c_s == 0)){
                     select_user = uid;
                     select_q_s = q_s;
                     select_c_s = c_s;
@@ -121,9 +121,9 @@ void demo_3(){
             if(user_task_index[uid] < tasks[uid].size()){
                 int q_s = 0, c_s = 0;
                 MessageTask task = tasks[uid][user_task_index[uid]];
-                if(last_task.msgType == task.msgType) q_s = 1;
+                if(cores_task_type[min_index] == task.msgType) q_s = 1;
                 if(task.exeTime + cores_time[min_index] <= task.deadLine) c_s = 1;
-                if(select_user != -1 || (select_q_s + select_c_s < q_s + c_s)){
+                if(select_user == -1 || (select_q_s + select_c_s < q_s + c_s) || (select_q_s == 0 && select_c_s == 1 && q_s == 1 && c_s == 0)){
                     select_user = uid;
                     select_q_s = q_s;
                     select_c_s = c_s;
@@ -132,8 +132,15 @@ void demo_3(){
         }
         if(select_user != -1){  // 选择成功
             cores[min_index].push_back(tasks[select_user][user_task_index[select_user]]);
+
+            cores_task_type[min_index] = tasks[select_user][user_task_index[select_user]].msgType;
+            cores_time[min_index] += tasks[select_user][user_task_index[select_user]].exeTime;
+
             task_num ++;
             user_task_index[select_user] ++;
+
+            all_q_score += select_q_s;
+            all_c_score += select_c_s;
         }  // 没有可选任务
         else cores_time[min_index] = INT_MAX;
 
@@ -172,7 +179,7 @@ int main()
     }
     
     // 3.逻辑调度
-    demo_3();
+    demo();
 
     // 4.输出结果，使用字符串存储，一次IO输出
     int q_score = 0;
@@ -192,6 +199,7 @@ int main()
         out << endl;
     }
     printf("%s", out.str().c_str());
-    cout << "q_score:" << q_score << " c_score:" << c_score;
+    // cout << "q_score:" << q_score << " c_score:" << c_score << " q_score + c_score:" << q_score + c_score << endl;
+    // cout << "all_q_score:" << all_q_score << " all_c_score:" << all_c_score << " all_q_score + all_c_score:" << all_q_score + all_c_score;
     return 0;
 }
