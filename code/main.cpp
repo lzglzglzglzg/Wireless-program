@@ -185,8 +185,8 @@ void demo_4(){
     core_task_type_num = vector<vector<int>>(m, vector<int>(max_task_type_num, 0));
     vector<int> core_all_time = vector<int>(m, 0);
     for(int i = 0; i < MAX_USER_ID; i ++){
-        if(user_all_time[i]) min_user_time = min(min_user_time, user_all_time[i]);
-        if(user_all_time[i]) max_user_time = max(max_user_time, user_all_time[i]);
+        if(user_all_time[i] != 0) min_user_time = min(min_user_time, user_all_time[i]);
+        if(user_all_time[i] != 0) max_user_time = max(max_user_time, user_all_time[i]);
     }
     while(task_num < n){
 
@@ -226,7 +226,7 @@ void demo_4(){
         if(select_user != -1){  // 选择成功
             cores[min_index].push_back(tasks[select_user][user_task_index[select_user]]);
             cores_users_num[min_index] ++;
-            task_type_num_of_core[cores_task_type[min_index]] --;
+            if(cores_task_type[min_index] != -1) task_type_num_of_core[cores_task_type[min_index]] --;
             task_type_num_of_core[tasks[select_user][user_task_index[select_user]].msgType] ++;
 
             cores_task_type[min_index] = tasks[select_user][user_task_index[select_user]].msgType;
@@ -313,14 +313,14 @@ int main()
         out << endl;
     }
     printf("%s", out.str().c_str());
-    for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] << " ";
-    cout << endl;
-    for (int coreId = 0; coreId < m; ++coreId) cout << cores_users_num[coreId] << " ";
-    cout << endl;
-    for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] / cores_users_num[coreId] << " ";
-    cout << endl;
-    cout << min_user_time << " " << max_user_time << endl;
-    cout << "q_score:" << q_score << " c_score:" << c_score << " q_score + c_score:" << q_score + c_score << endl;
-    cout << "all_q_score:" << all_q_score << " all_c_score:" << all_c_score << " all_q_score + all_c_score:" << all_q_score + all_c_score;
+    // for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] << " ";
+    // cout << endl;
+    // for (int coreId = 0; coreId < m; ++coreId) cout << cores_users_num[coreId] << " ";
+    // cout << endl;
+    // for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] / cores_users_num[coreId] << " ";
+    // cout << endl;
+    // cout << min_user_time << " " << max_user_time << endl;
+    // cout << "q_score:" << q_score << " c_score:" << c_score << " q_score + c_score:" << q_score + c_score << endl;
+    // cout << "all_q_score:" << all_q_score << " all_c_score:" << all_c_score << " all_q_score + all_c_score:" << all_q_score + all_c_score;
     return 0;
 }
