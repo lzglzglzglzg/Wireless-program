@@ -31,6 +31,8 @@ vector<vector<int>> core_task_type_num; // 核所负责的各个任务类型的�
 vector<int> dispersed_task_type_num; // 没有对应核的各个任务类型的任务数量（只计算用户待调度的第一个任务）
 vector<int> cores_users_num; // 每个核的用户数量
 vector<int> task_type_num_of_core; // 统计每个核最后一个任务类型数量
+int min_user_time = INT_MAX;
+int max_user_time = INT_MIN;
 
 void get_users_of_core(){
     for (int uid = 0; uid < MAX_USER_ID; ++uid) {
@@ -181,6 +183,11 @@ void demo_3(){
 void demo_4(){
     int task_num = 0; // 已分配任务数量
     core_task_type_num = vector<vector<int>>(m, vector<int>(max_task_type_num, 0));
+    vector<int> core_all_time = vector<int>(m, 0);
+    for(int i = 0; i < MAX_USER_ID; i ++){
+        if(user_all_time[i]) min_user_time = min(min_user_time, user_all_time[i]);
+        if(user_all_time[i]) max_user_time = max(max_user_time, user_all_time[i]);
+    }
     while(task_num < n){
 
         auto min_iter = min_element(cores_time.begin(), cores_time.end());
@@ -237,6 +244,7 @@ void demo_4(){
         if(position != dispersed_users.end()){
             dispersed_users.erase(position);
             users_of_core[min_index].push_back(select_user);
+            core_all_time[min_index] += user_all_time[select_user];
 
             dispersed_task_type_num[tasks[select_user][user_task_index[select_user] - 1].msgType] --;
         }
@@ -276,6 +284,7 @@ int main()
         task.deadLine = std::min(task.deadLine, c);
         tasks[task.usrInst].push_back(task);
         user_all_time[task.usrInst] += task.exeTime;
+        all_exe_time += task.exeTime;
 
         if(tasks[task.usrInst].size() == 1){
             dispersed_users.push_back(task.usrInst);  
@@ -310,6 +319,7 @@ int main()
     cout << endl;
     for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] / cores_users_num[coreId] << " ";
     cout << endl;
+    cout << min_user_time << " " << max_user_time << endl;
     cout << "q_score:" << q_score << " c_score:" << c_score << " q_score + c_score:" << q_score + c_score << endl;
     cout << "all_q_score:" << all_q_score << " all_c_score:" << all_c_score << " all_q_score + all_c_score:" << all_q_score + all_c_score;
     return 0;
