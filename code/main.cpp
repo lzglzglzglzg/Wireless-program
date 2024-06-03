@@ -29,6 +29,8 @@ int all_q_score = 0, all_c_score = 0;
 int all_exe_time = 0; // 所有任务运行时间总和
 vector<vector<int>> core_task_type_num; // 核所负责的各个任务类型的任务数量（只计算用户待调度的第一个任务）
 vector<int> dispersed_task_type_num; // 没有对应核的各个任务类型的任务数量（只计算用户待调度的第一个任务）
+vector<int> cores_users_num; // 每个核的用户数量
+vector<int> task_type_num_of_core; // 统计每个核最后一个任务类型数量
 
 void get_users_of_core(){
     for (int uid = 0; uid < MAX_USER_ID; ++uid) {
@@ -43,13 +45,19 @@ void get_users_of_core(){
     }
 }
 
-bool is_change(int select_user, int select_q_s, int select_c_s, int q_s, int c_s, MessageTask task){
+bool is_change(int select_user, int select_q_s, int select_c_s, int q_s, int c_s, MessageTask task, int core_id){
     if(select_user == -1) return true;
+    MessageTask select_task = tasks[select_user][user_task_index[select_user]];
     if(select_q_s + select_c_s < q_s + c_s) return true;
     if(select_q_s == 0 && select_c_s == 1 && q_s == 1 && c_s == 0) return true;
-    if(select_q_s == q_s && select_c_s == c_s){
-        if(task.exeTime < tasks[select_user][user_task_index[select_user]].exeTime) return true;
-        
+    if(select_q_s == q_s && select_c_s == c_s){  // 根据任务类型和任务执行时间
+        if(task.msgType != select_task.msgType){
+            if((core_task_type_num[core_id][task.msgType] + dispersed_task_type_num[task.msgType]) / (task_type_num_of_core[task.msgType] + 1) > \
+            core_task_type_num[core_id][select_task.msgType] + dispersed_task_type_num[select_task.msgType] / (task_type_num_of_core[select_task.msgType] + 1)) return true;
+        }
+        else{
+            if(task.deadLine - task.exeTime < select_task.deadLine - select_task.exeTime) return true;
+        }
     }
     return false;
 }
@@ -187,7 +195,7 @@ void demo_4(){
                 MessageTask task = tasks[uid][user_task_index[uid]];
                 if(cores_task_type[min_index] == task.msgType) q_s = 1;
                 if(task.exeTime + cores_time[min_index] <= task.deadLine) c_s = 1;
-                if(is_change(select_user, select_q_s, select_c_s, q_s, c_s, task)){
+                if(is_change(select_user, select_q_s, select_c_s, q_s, c_s, task, min_index)){
                     select_user = uid;
                     select_q_s = q_s;
                     select_c_s = c_s;
@@ -201,7 +209,7 @@ void demo_4(){
                 MessageTask task = tasks[uid][user_task_index[uid]];
                 if(cores_task_type[min_index] == task.msgType) q_s = 1;
                 if(task.exeTime + cores_time[min_index] <= task.deadLine) c_s = 1;
-                if(is_change(select_user, select_q_s, select_c_s, q_s, c_s, task)){
+                if(is_change(select_user, select_q_s, select_c_s, q_s, c_s, task, min_index)){
                     select_user = uid;
                     select_q_s = q_s;
                     select_c_s = c_s;
@@ -210,6 +218,9 @@ void demo_4(){
         }
         if(select_user != -1){  // 选择成功
             cores[min_index].push_back(tasks[select_user][user_task_index[select_user]]);
+            cores_users_num[min_index] ++;
+            task_type_num_of_core[cores_task_type[min_index]] --;
+            task_type_num_of_core[tasks[select_user][user_task_index[select_user]].msgType] ++;
 
             cores_task_type[min_index] = tasks[select_user][user_task_index[select_user]].msgType;
             cores_time[min_index] += tasks[select_user][user_task_index[select_user]].exeTime;
@@ -254,6 +265,8 @@ int main()
     user_all_time = vector<int>(MAX_USER_ID, 0);
     users_of_core = vector<vector<int>>(m);
     dispersed_task_type_num = vector<int>(max_task_type_num, 0);
+    cores_users_num = vector<int> (m, 0);
+    task_type_num_of_core = vector<int>(max_task_type_num, 0);
 
     // 2.读取每个任务的信息
     tasks.resize(MAX_USER_ID);
@@ -292,6 +305,10 @@ int main()
     }
     printf("%s", out.str().c_str());
     for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] << " ";
+    cout << endl;
+    for (int coreId = 0; coreId < m; ++coreId) cout << cores_users_num[coreId] << " ";
+    cout << endl;
+    for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] / cores_users_num[coreId] << " ";
     cout << endl;
     cout << "q_score:" << q_score << " c_score:" << c_score << " q_score + c_score:" << q_score + c_score << endl;
     cout << "all_q_score:" << all_q_score << " all_c_score:" << all_c_score << " all_q_score + all_c_score:" << all_q_score + all_c_score;
