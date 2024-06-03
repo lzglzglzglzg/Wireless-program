@@ -25,6 +25,7 @@ vector<int> user_all_time;  // 用户的任务时间总和
 vector<vector<int>> users_of_core; // 每个核所负责的用户
 vector<int> dispersed_users; // 没有对应核的用户
 int all_q_score = 0, all_c_score = 0;
+int all_exe_time = 0; // 所有任务运行时间总和
 
 void get_users_of_core(){
     for (int uid = 0; uid < MAX_USER_ID; ++uid) {
@@ -109,7 +110,8 @@ void demo_3(){
                 MessageTask task = tasks[uid][user_task_index[uid]];
                 if(cores_task_type[min_index] == task.msgType) q_s = 1;
                 if(task.exeTime + cores_time[min_index] <= task.deadLine) c_s = 1;
-                if(select_user == -1 || (select_q_s + select_c_s < q_s + c_s) || (select_q_s == 0 && select_c_s == 1 && q_s == 1 && c_s == 0)){
+                if(select_user == -1 || (select_q_s + select_c_s < q_s + c_s) || (select_q_s == 0 && select_c_s == 1 && q_s == 1 && c_s == 0) ||\
+                (select_q_s == q_s && select_c_s == c_s && task.exeTime < tasks[select_user][user_task_index[select_user]].exeTime)){
                     select_user = uid;
                     select_q_s = q_s;
                     select_c_s = c_s;
@@ -123,7 +125,8 @@ void demo_3(){
                 MessageTask task = tasks[uid][user_task_index[uid]];
                 if(cores_task_type[min_index] == task.msgType) q_s = 1;
                 if(task.exeTime + cores_time[min_index] <= task.deadLine) c_s = 1;
-                if(select_user == -1 || (select_q_s + select_c_s < q_s + c_s) || (select_q_s == 0 && select_c_s == 1 && q_s == 1 && c_s == 0)){
+                if(select_user == -1 || (select_q_s + select_c_s < q_s + c_s) || (select_q_s == 0 && select_c_s == 1 && q_s == 1 && c_s == 0) ||\
+                (select_q_s == q_s && select_c_s == c_s && task.exeTime < tasks[select_user][user_task_index[select_user]].exeTime)){
                     select_user = uid;
                     select_q_s = q_s;
                     select_c_s = c_s;
@@ -184,21 +187,23 @@ int main()
     // 4.输出结果，使用字符串存储，一次IO输出
     int q_score = 0;
     int c_score = 0;
+    cores_time = vector<int>(m, 0);
     stringstream out;
     for (int coreId = 0; coreId < m; ++coreId) {
         out << cores[coreId].size();
         int task_type = -1;
-        int now_time = 0;
         for (auto &task : cores[coreId]) {
             out << " " << task.msgType << " " << task.usrInst;
             if(task_type == task.msgType) q_score ++;
             task_type = task.msgType;
-            if(task.deadLine >= task.exeTime + now_time) c_score ++;
-            now_time += task.exeTime;
+            if(task.deadLine >= task.exeTime + cores_time[coreId]) c_score ++;
+            cores_time[coreId] += task.exeTime;
         }
         out << endl;
     }
     printf("%s", out.str().c_str());
+    // for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] << " ";
+    // cout << endl;
     // cout << "q_score:" << q_score << " c_score:" << c_score << " q_score + c_score:" << q_score + c_score << endl;
     // cout << "all_q_score:" << all_q_score << " all_c_score:" << all_c_score << " all_q_score + all_c_score:" << all_q_score + all_c_score;
     return 0;

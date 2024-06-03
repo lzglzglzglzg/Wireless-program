@@ -39,12 +39,12 @@ def main():
     optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-5)
 
     # 训练模型
-    num_epochs = 100
+    num_epochs = 1000
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
     model.to(device)
 
-    max_acc = 0.3
+    max_acc = 0.7
 
     losses = []  # 用于收集每个epoch的平均损失
 
