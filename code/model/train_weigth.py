@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from imblearn.over_sampling import RandomOverSampler
 
-from model import Model, ComplexModel
+from model import Model, ComplexModel, Net1, Net2
 from datasets import ComplexDataset_train, collate_fn_train
 from utils import preprocess_train
 
@@ -22,7 +22,7 @@ def main():
     category_counts = [0] * 11
 
     # 划分数据集
-    train_data, val_data, train_labels, val_labels = train_test_split(data, labels, test_size=0.1, random_state=42)
+    train_data, val_data, train_labels, val_labels = train_test_split(data, labels, test_size=0.05, random_state=42)
 
     ros = RandomOverSampler(random_state=42)
     # train_data_resampled, train_labels_resampled = ros.fit_resample(train_data, train_labels)
@@ -37,19 +37,15 @@ def main():
         for target in batch_targets:
             category_counts[int(target)] += 1
 
-    c_num = [0] * 11
-    for _, labels in train_loader:
-        for label in labels:
-            c_num[label.item()] += 1
-
     # 定义模型
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = ComplexModel()
-    criterion = nn.CrossEntropyLoss(weight=torch.tensor([1 / i  for i in c_num]).to(device))
+    # model = ComplexModel()
+    model = Net2()
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-5)
 
     # 训练模型
     num_epochs = 5000
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
     model.to(device)
 
@@ -65,7 +61,7 @@ def main():
         for inputs, targets in train_loader:
             inputs, targets = inputs.to(device), targets.to(device)
             optimizer.zero_grad()
-            outputs = model(inputs).to(device)
+            outputs = model(inputs)
             loss = criterion(outputs, targets)
             loss.backward()
             optimizer.step()
@@ -114,7 +110,7 @@ def main():
         print(f'{category_eval_counts[0]} {category_eval_counts[1]} {category_eval_counts[2]} {category_eval_counts[3]} {category_eval_counts[4]} {category_eval_counts[5]} {category_eval_counts[6]} {category_eval_counts[7]} {category_eval_counts[8]} {category_eval_counts[9]} {category_eval_counts[10]}')
         print(f'{category_counts[0]} {category_counts[1]} {category_counts[2]} {category_counts[3]} {category_counts[4]} {category_counts[5]} {category_counts[6]} {category_counts[7]} {category_counts[8]} {category_counts[9]} {category_counts[10]}')
         if accuracy >= max_acc:
-            torch.save(model, f'../checkpoint/model_main_{int(accuracy * 10000)}.pth')
+            torch.save(model, f'../checkpoint/model_cnn_{int(accuracy * 10000)}.pth')
             max_acc = accuracy
 
     # 绘制损失随epoch变化的图

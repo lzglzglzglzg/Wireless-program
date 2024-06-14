@@ -16,7 +16,9 @@ class ComplexDataset_train(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        sample = {'data': torch.tensor(self.data[idx], dtype=torch.float32),
+        # sample = {'data': torch.tensor(self.data[idx], dtype=torch.float32),
+        #           'label': torch.tensor(self.labels[idx], dtype=torch.long)}
+        sample = {'data': torch.tensor(np.expand_dims(self.data[idx], axis=0), dtype=torch.float32),
                   'label': torch.tensor(self.labels[idx], dtype=torch.long)}
         return sample
 
