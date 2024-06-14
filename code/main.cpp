@@ -43,6 +43,8 @@ vector<int> init_dispersed_task_type_num; // 没有对应核的各个任务类�
 int result_score;
 vector<vector<MessageTask>> result_cores; // 输出时，每个核的任务列表
 
+vector<vector<vector<int>>> type_and_num;
+
 
 void init(){
     dispersed_users = init_dispersed_users;  
@@ -61,8 +63,6 @@ void init(){
 }
 
 void get_users_of_core(){
-
-    
 
     for (int uid = 0; uid < MAX_USER_ID; ++uid) {
         if (tasks[uid].empty()) {
@@ -602,6 +602,7 @@ int main()
     demo_4();
     demo_6();
 
+    type_and_num = vector<vector<vector<int>>>(m, vector<vector<int>>());
     // 4.输出结果，使用字符串存储，一次IO输出
     int q_score = 0;
     int c_score = 0;
@@ -617,20 +618,32 @@ int main()
             // task.exeTime = task.exeTime * 6 / 5;
             if(task.deadLine >= task.exeTime + cores_time[coreId]) c_score ++;
             cores_time[coreId] += task.exeTime;
+
+            int index_num = type_and_num[coreId].size();
+            if(index_num == 0 || type_and_num[coreId][index_num - 1][0] != task.msgType){
+                type_and_num[coreId].push_back({task.msgType, 1});
+            }
+            else type_and_num[coreId][index_num - 1][1] ++;
         }
         out << endl;
     }
     printf("%s", out.str().c_str());
-    // for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] << " ";
-    // cout << endl;
-    // for (int coreId = 0; coreId < m; ++coreId) cout << cores_users_num[coreId] << " ";
-    // cout << endl;
-    // for (int coreId = 0; coreId < m; ++coreId)
-    //     if(cores_users_num[coreId] != 0) cout << cores_time[coreId] / cores_users_num[coreId] << " ";
-    //     else cout << 0 << " ";
-    // cout << endl;
-    // cout << min_user_time << " " << max_user_time << endl;
-    // cout << "q_score:" << q_score << " c_score:" << c_score << " q_score + c_score:" << q_score + c_score << endl;
+    for (int coreId = 0; coreId < m; ++coreId) {
+        cout << "------------------" << coreId << "------------------" << endl;
+        for(int i = 0; i < type_and_num[coreId].size(); i ++){
+            cout << type_and_num[coreId][i][0] << " " << type_and_num[coreId][i][1] << endl;
+        }
+    }
+    for (int coreId = 0; coreId < m; ++coreId) cout << cores_time[coreId] << " ";
+    cout << endl;
+    for (int coreId = 0; coreId < m; ++coreId) cout << cores_users_num[coreId] << " ";
+    cout << endl;
+    for (int coreId = 0; coreId < m; ++coreId)
+        if(cores_users_num[coreId] != 0) cout << cores_time[coreId] / cores_users_num[coreId] << " ";
+        else cout << 0 << " ";
+    cout << endl;
+    cout << min_user_time << " " << max_user_time << endl;
+    cout << "q_score:" << q_score << " c_score:" << c_score << " q_score + c_score:" << q_score + c_score << endl;
     // cout << "all_q_score:" << all_q_score << " all_c_score:" << all_c_score << " all_q_score + all_c_score:" << all_q_score + all_c_score;
     return 0;
 }
