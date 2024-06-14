@@ -18,7 +18,7 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, collate_fn=collate_fn_test)
 
     # 加载模型
-    model_path = '../checkpoint/model_main_9092.pth'  # 替换为你的模型路径
+    model_path = '../checkpoint/model_cnn_8703.pth'  # 替换为你的模型路径
     model = torch.load(model_path, map_location='cpu')
     model.eval()
 

@@ -30,7 +30,8 @@ class ComplexDataset_test(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        sample = {'data': torch.tensor(self.data[idx], dtype=torch.float32)}
+        # sample = {'data': torch.tensor(self.data[idx], dtype=torch.float32)}
+        sample = {'data': torch.tensor(np.expand_dims(self.data[idx], axis=0), dtype=torch.float32)}
         return sample
     
 def collate_fn_train(batch):
